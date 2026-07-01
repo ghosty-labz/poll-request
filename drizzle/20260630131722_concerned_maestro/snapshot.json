@@ -1,0 +1,342 @@
+{
+  "version": "7",
+  "dialect": "sqlite",
+  "id": "44fd9563-c085-4b3a-af53-930a1ed2e623",
+  "prevIds": [
+    "233b2e36-c80a-4b36-b74d-4bf588abb06c"
+  ],
+  "ddl": [
+    {
+      "name": "poll_options",
+      "entityType": "tables"
+    },
+    {
+      "name": "polls",
+      "entityType": "tables"
+    },
+    {
+      "name": "votes",
+      "entityType": "tables"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "poll_options"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "poll_id",
+      "entityType": "columns",
+      "table": "poll_options"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "text",
+      "entityType": "columns",
+      "table": "poll_options"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "image_url",
+      "entityType": "columns",
+      "table": "poll_options"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "display_order",
+      "entityType": "columns",
+      "table": "poll_options"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "poll_options"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "polls"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "public_id",
+      "entityType": "columns",
+      "table": "polls"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "management_key",
+      "entityType": "columns",
+      "table": "polls"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "creator_id",
+      "entityType": "columns",
+      "table": "polls"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "title",
+      "entityType": "columns",
+      "table": "polls"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "description",
+      "entityType": "columns",
+      "table": "polls"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "expires_at",
+      "entityType": "columns",
+      "table": "polls"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "polls"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "polls"
+    },
+    {
+      "type": "integer",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "deleted_at",
+      "entityType": "columns",
+      "table": "polls"
+    },
+    {
+      "type": "text",
+      "notNull": false,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "id",
+      "entityType": "columns",
+      "table": "votes"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "poll_id",
+      "entityType": "columns",
+      "table": "votes"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "option_id",
+      "entityType": "columns",
+      "table": "votes"
+    },
+    {
+      "type": "text",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "voter_token",
+      "entityType": "columns",
+      "table": "votes"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "created_at",
+      "entityType": "columns",
+      "table": "votes"
+    },
+    {
+      "type": "integer",
+      "notNull": true,
+      "autoincrement": false,
+      "default": null,
+      "generated": null,
+      "name": "updated_at",
+      "entityType": "columns",
+      "table": "votes"
+    },
+    {
+      "columns": [
+        "poll_id"
+      ],
+      "tableTo": "polls",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_poll_options_poll_id_polls_id_fk",
+      "entityType": "fks",
+      "table": "poll_options"
+    },
+    {
+      "columns": [
+        "poll_id"
+      ],
+      "tableTo": "polls",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_votes_poll_id_polls_id_fk",
+      "entityType": "fks",
+      "table": "votes"
+    },
+    {
+      "columns": [
+        "option_id"
+      ],
+      "tableTo": "poll_options",
+      "columnsTo": [
+        "id"
+      ],
+      "onUpdate": "NO ACTION",
+      "onDelete": "CASCADE",
+      "nameExplicit": false,
+      "name": "fk_votes_option_id_poll_options_id_fk",
+      "entityType": "fks",
+      "table": "votes"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "poll_options_pk",
+      "table": "poll_options",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "polls_pk",
+      "table": "polls",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        "id"
+      ],
+      "nameExplicit": false,
+      "name": "votes_pk",
+      "table": "votes",
+      "entityType": "pks"
+    },
+    {
+      "columns": [
+        {
+          "value": "poll_id",
+          "isExpression": false
+        },
+        {
+          "value": "voter_token",
+          "isExpression": false
+        }
+      ],
+      "isUnique": true,
+      "where": null,
+      "origin": "manual",
+      "name": "votes_poll_voter_unq",
+      "entityType": "indexes",
+      "table": "votes"
+    },
+    {
+      "columns": [
+        "public_id"
+      ],
+      "nameExplicit": false,
+      "name": "polls_public_id_unique",
+      "entityType": "uniques",
+      "table": "polls"
+    }
+  ],
+  "renames": []
+}

@@ -11,6 +11,9 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "node --env-file=.env.local node_modules/drizzle-kit/bin.cjs push",
+    "db:studio": "node --env-file=.env.local node_modules/drizzle-kit/bin.cjs studio",
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
@@ -22,6 +25,7 @@
     "@tanstack/react-router-ssr-query": "latest",
     "@tanstack/react-start": "latest",
     "@tanstack/router-plugin": "^1.132.0",
+    "drizzle-orm": "^1.0.0-rc.4",
     "lucide-react": "^0.545.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -37,6 +41,7 @@
     "@types/react": "^19.2.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^6.0.1",
+    "drizzle-kit": "^1.0.0-rc.4",
     "jsdom": "^28.1.0",
     "typescript": "^6.0.2",
     "vite": "^8.0.0",

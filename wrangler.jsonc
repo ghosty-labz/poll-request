@@ -1,7 +1,25 @@
 {
-  "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "poll-request",
-  "compatibility_date": "2025-09-02",
-  "compatibility_flags": ["nodejs_compat"],
-  "main": "@tanstack/react-start/server-entry",
+	"$schema": "node_modules/wrangler/config-schema.json",
+	"name": "poll-request",
+	"compatibility_date": "2025-09-02",
+	"compatibility_flags": [
+		"nodejs_compat"
+	],
+	"main": "src/server.ts",
+	"d1_databases": [
+		{
+			"binding": "dev_poll_request_db",
+			"database_name": "dev-poll-request-db",
+			"database_id": "555798ff-fcae-451e-b4f7-e244e621f3e5",
+			"remote": true
+		}
+	],
+	"durable_objects": {
+		"bindings": [
+			{ "name": "POLL_ROOM", "class_name": "PollRoom" }
+		]
+	},
+	"migrations": [
+		{ "tag": "v1", "new_sqlite_classes": ["PollRoom"] }
+	],
 }

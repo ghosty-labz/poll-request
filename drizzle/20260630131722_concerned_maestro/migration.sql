@@ -1,0 +1,1 @@
+ALTER TABLE `polls` ADD `creator_id` text;
