@@ -13,7 +13,9 @@ function NewPollPage() {
             <span className="inline-flex h-[30px] w-[30px] items-center justify-center rounded-md bg-ink font-pixel text-[11px] text-neon">
               PR
             </span>
-            <span className="font-plex text-[15px] font-bold text-ink">poll_request</span>
+            <span className="font-plex text-[15px] font-bold text-ink">
+              poll_request
+            </span>
           </Link>
           <div className="flex items-center gap-6 font-plex text-[13px] font-medium text-[#5c6356]">
             <span className="text-ink">$ poll init</span>
@@ -34,8 +36,8 @@ function NewPollPage() {
             Request
           </h1>
           <p className="m-0 mt-[22px] max-w-[520px] font-plex text-[15px] leading-[1.7] text-[#54594c]">
-            Draft your question, stack the options, set the rules. Hit create and you’ll get one
-            link to drop wherever your team lurks.
+            Draft your question, stack the options, set the rules. Hit create
+            and you’ll get one link to drop wherever your team lurks.
           </p>
         </div>
 

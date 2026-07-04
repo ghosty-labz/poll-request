@@ -9,14 +9,18 @@ export function PollNotFound() {
   return (
     <div className="flex min-h-screen flex-col bg-cream font-plex text-ink">
       {/* nav */}
-      <div className="mx-auto flex w-full max-w-[1180px] items-center justify-between border-b-2 border-ink px-11 py-[22px]">
-        <Link to="/" className="flex items-center gap-[11px] no-underline">
+      <div className="mx-auto flex w-full max-w-[1180px] items-center justify-between border-b-2 border-ink px-11 py-5.5">
+        <Link to="/" className="flex items-center gap-2.75 no-underline">
           <span className="inline-flex h-[30px] w-[30px] items-center justify-center rounded-md bg-ink font-pixel text-[11px] text-neon">
             PR
           </span>
-          <span className="font-plex text-[15px] font-bold text-ink">poll_request</span>
+          <span className="font-plex text-[15px] font-bold text-ink">
+            poll_request
+          </span>
         </Link>
-        <span className="font-plex text-xs font-semibold text-[#5c6356]">error · 404</span>
+        <span className="font-plex text-xs font-semibold text-[#5c6356]">
+          error · 404
+        </span>
       </div>
 
       {/* body */}
@@ -50,21 +54,25 @@ export function PollNotFound() {
             This Poll Request hit a merge conflict
           </h1>
           <p className="mx-auto mt-4 max-w-[440px] font-plex text-[15px] leading-[1.75] text-[#54594c]">
-            The link you followed is expired, deleted, or never existed. Like a stash you can’t pop
-            — it’s just gone.
+            The link you followed is expired, deleted, or never existed. Like a
+            stash you can’t pop — it’s just gone.
           </p>
 
           {/* terminal readout */}
           <div className="mx-auto mt-[30px] max-w-[460px] rounded-[11px] border-2 border-ink bg-ink px-5 py-[18px] text-left font-plex text-[13px] font-medium leading-[1.85] shadow-[6px_6px_0_var(--color-neon)]">
-            <div className="text-[#8fa886]">$ poll fetch tabs-or-spaces-x7f2</div>
+            <div className="text-[#8fa886]">
+              $ poll fetch tabs-or-spaces-x7f2
+            </div>
             <div className="text-[#ff8a93]">
-              fatal: poll &apos;<span className="text-[#ffb84d]">x7f2</span>&apos; does not exist
+              fatal: poll &apos;<span className="text-[#ffb84d]">x7f2</span>
+              &apos; does not exist
             </div>
             <div className="text-[#d6efce]">
               hint: it may have been closed, deleted, or it’s a typo
             </div>
             <div className="text-neon">
-              → try opening a fresh one <span className="animate-pr-pulse">▍</span>
+              → try opening a fresh one{" "}
+              <span className="animate-pr-pulse">▍</span>
             </div>
           </div>
 
@@ -97,7 +105,13 @@ export function PollNotFound() {
 /** The little mascot ghost from the design (a `dc-import` in the source). */
 function Ghost({ color }: { color: string }) {
   return (
-    <svg width="52" height="52" viewBox="0 0 40 44" fill="none" aria-hidden="true">
+    <svg
+      width="52"
+      height="52"
+      viewBox="0 0 40 44"
+      fill="none"
+      aria-hidden="true"
+    >
       <path
         d="M4 19C4 9 10.6 2 20 2C29.4 2 36 9 36 19V39L32 35L28 39L24 35L20 39L16 35L12 39L8 35L4 39Z"
         fill={color}
