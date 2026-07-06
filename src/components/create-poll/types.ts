@@ -1,5 +1,7 @@
 /** Shared types & constants for the Create Poll form. */
 
+import type { PollDurationHours } from "#/lib/poll/contracts";
+
 export type PollFormat = "single" | "multi" | "ranked";
 
 export interface PollOptionDraft {
@@ -11,6 +13,7 @@ export interface PollDraft {
   question: string;
   options: PollOptionDraft[];
   format: PollFormat;
+  durationHours: PollDurationHours;
   anon: boolean;
   allowChanges: boolean;
   showResults: boolean;
@@ -39,6 +42,16 @@ export const FORMAT_OPTIONS: Array<{
   { key: "single", label: "Single", hint: "pick one" },
   { key: "multi", label: "Multi", hint: "pick many" },
   { key: "ranked", label: "Ranked", hint: "order them" },
+];
+
+export const DURATION_OPTIONS: Array<{
+  hours: PollDurationHours;
+  label: string;
+  hint: string;
+}> = [
+  { hours: 1, label: "1 hour", hint: "lightning round" },
+  { hours: 3, label: "3 hours", hint: "long meeting" },
+  { hours: 24, label: "24 hours", hint: "sleep on it" },
 ];
 
 export const RULE_TOGGLES: Array<{

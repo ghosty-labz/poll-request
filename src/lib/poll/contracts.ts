@@ -78,11 +78,20 @@ export interface ListMyPollsResponse {
   polls: PollSummary[];
 }
 
+/** How long a poll accepts votes, as offered by the create form. */
+export const POLL_DURATION_HOURS = [1, 3, 24] as const;
+export type PollDurationHours = (typeof POLL_DURATION_HOURS)[number];
+
 /** Request body for `POST /api/polls`. */
 export interface CreatePollRequest {
   title: string;
   description?: string | null;
-  /** ISO timestamp. Defaults to now + 36h when omitted. */
+  /**
+   * How long the poll stays open, from creation. Takes precedence over
+   * `expiresAt`; must be one of `POLL_DURATION_HOURS`.
+   */
+  durationHours?: PollDurationHours;
+  /** ISO timestamp. Defaults to now + 36h when neither field is given. */
   expiresAt?: string;
   options: Array<{ text: string; imageUrl?: string | null }>;
 }

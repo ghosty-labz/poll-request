@@ -1,14 +1,22 @@
+import type { PollDurationHours } from "#/lib/poll/contracts";
 import { FormCard, StepLabel } from "./FormCard";
-import { FORMAT_OPTIONS, RULE_TOGGLES, type PollDraft, type PollFormat } from "./types";
+import {
+  DURATION_OPTIONS,
+  FORMAT_OPTIONS,
+  RULE_TOGGLES,
+  type PollDraft,
+  type PollFormat,
+} from "./types";
 
 interface PollRulesProps {
   draft: PollDraft;
   onFormatChange: (format: PollFormat) => void;
+  onDurationChange: (hours: PollDurationHours) => void;
   onToggle: (key: "anon" | "allowChanges" | "showResults") => void;
 }
 
-/** Step 03 — voting format + behaviour toggles. */
-export function PollRules({ draft, onFormatChange, onToggle }: PollRulesProps) {
+/** Step 03 — voting format, poll length + behaviour toggles. */
+export function PollRules({ draft, onFormatChange, onDurationChange, onToggle }: PollRulesProps) {
   return (
     <FormCard>
       <StepLabel className="mb-4 block">03 · Rules</StepLabel>
@@ -31,6 +39,29 @@ export function PollRules({ draft, onFormatChange, onToggle }: PollRulesProps) {
             >
               <div className="mb-1 font-plex text-[13px] font-bold">{fmt.label}</div>
               <div className="font-plex text-[10px] leading-[1.4] opacity-70">{fmt.hint}</div>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="mb-[9px] font-plex text-xs font-semibold text-[#54594c]">
+        Poll length
+      </div>
+      <div className="mb-[22px] grid grid-cols-3 gap-[10px]">
+        {DURATION_OPTIONS.map((dur) => {
+          const active = draft.durationHours === dur.hours;
+          return (
+            <button
+              type="button"
+              key={dur.hours}
+              onClick={() => onDurationChange(dur.hours)}
+              aria-pressed={active}
+              className={`rounded-lg border-2 border-ink px-3 py-[13px] text-center transition-shadow ${
+                active ? "bg-neon shadow-[3px_3px_0_var(--color-ink)]" : "bg-white text-[#54594c]"
+              }`}
+            >
+              <div className="mb-1 font-plex text-[13px] font-bold">{dur.label}</div>
+              <div className="font-plex text-[10px] leading-[1.4] opacity-70">{dur.hint}</div>
             </button>
           );
         })}

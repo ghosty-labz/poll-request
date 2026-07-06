@@ -12,7 +12,11 @@ interface LivePreviewProps {
 export function LivePreview({ draft, shareUrl }: LivePreviewProps) {
   const formatLabel = FORMAT_LABELS[draft.format];
   const question = draft.question.trim() || "Your question shows up here…";
-  const meta = [draft.anon ? "anonymous" : "named", formatLabel].join(" · ");
+  const meta = [
+    draft.anon ? "anonymous" : "named",
+    formatLabel,
+    `closes in ${draft.durationHours}h`,
+  ].join(" · ");
 
   return (
     <div className="sticky top-6">

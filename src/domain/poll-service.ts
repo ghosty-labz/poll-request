@@ -14,10 +14,16 @@ import {
   upsertVote,
 } from "#/db/repositories/poll-repository";
 import type { NewPoll, NewPollOption, Poll, PollOption } from "#/db/schema";
-import { notifyPollChanged } from "#/durable-objects/poll-room";
+import { notifyPollChanged, schedulePollClose } from "#/durable-objects/poll-room";
 import { badRequest, conflict, forbidden, notFound } from "#/lib/errors";
 import { newId, newToken } from "#/lib/ids";
-import type { CreatePollResponse, PollSummary, PollView } from "#/lib/poll/contracts";
+import {
+  POLL_DURATION_HOURS,
+  type CreatePollResponse,
+  type PollDurationHours,
+  type PollSummary,
+  type PollView,
+} from "#/lib/poll/contracts";
 import { projectPollSummary, projectPollView } from "./poll-projector";
 
 const DEFAULT_DURATION_MS = 36 * 60 * 60 * 1000; // 36 hours
@@ -53,6 +59,9 @@ export async function createPoll(
   }));
 
   await insertPollWithOptions(db, pollRow, optionRows);
+
+  // Arm the poll's close alarm: its PollRoom pushes the final snapshot at expiry.
+  await schedulePollClose(publicId, input.expiresAt);
 
   // Creator sees results immediately and can manage.
   const poll = await requirePoll(publicId);
@@ -152,6 +161,7 @@ export async function updatePoll(args: {
   const patch = parseUpdatePollInput(args.rawInput);
   if (Object.keys(patch).length > 0) {
     await updatePollFields(db, poll.id, patch);
+    if (patch.expiresAt) await schedulePollClose(poll.publicId, patch.expiresAt);
     await notifyPollChanged(poll.publicId);
   }
 
@@ -169,6 +179,7 @@ export async function deletePoll(args: {
   const poll = await requirePoll(args.publicId);
   assertCanManage(poll, args.identitySub, args.managementKey);
   await softDeletePoll(db, poll.id);
+  await schedulePollClose(poll.publicId, null);
   await notifyPollChanged(poll.publicId);
 }
 
@@ -247,7 +258,15 @@ function parseCreatePollInput(raw: unknown): {
       : null;
 
   let expiresAt: Date;
-  if (body.expiresAt === undefined || body.expiresAt === null) {
+  if (body.durationHours !== undefined && body.durationHours !== null) {
+    if (!POLL_DURATION_HOURS.includes(body.durationHours as PollDurationHours)) {
+      throw badRequest(
+        "invalid_duration",
+        `durationHours must be one of: ${POLL_DURATION_HOURS.join(", ")}.`,
+      );
+    }
+    expiresAt = new Date(Date.now() + (body.durationHours as number) * 60 * 60 * 1000);
+  } else if (body.expiresAt === undefined || body.expiresAt === null) {
     expiresAt = new Date(Date.now() + DEFAULT_DURATION_MS);
   } else if (typeof body.expiresAt === "string") {
     expiresAt = new Date(body.expiresAt);

@@ -61,6 +61,28 @@ export class PollRoom extends DurableObject<Env> {
     await Promise.all([...this.connections.keys()].map((id) => this.refresh(id)));
   }
 
+  /**
+   * RPC: (re)arm the close alarm at the poll's expiry. `setAlarm` replaces any
+   * existing alarm, so extending a poll just moves the trigger. Null (deleted
+   * poll) or a past expiry (manual close, which already notified) cancels it.
+   */
+  async scheduleClose(expiresAtMs: number | null): Promise<void> {
+    if (expiresAtMs === null || expiresAtMs <= Date.now()) {
+      await this.ctx.storage.deleteAlarm();
+      return;
+    }
+    await this.ctx.storage.setAlarm(expiresAtMs);
+  }
+
+  /**
+   * Fires at expiry: pushes the closing snapshot (`isExpired: true`, results
+   * now visible) to every open connection the moment the poll closes, instead
+   * of waiting for the next vote to trigger a refresh.
+   */
+  async alarm(): Promise<void> {
+    await this.notifyChange();
+  }
+
   private async refresh(connId: string): Promise<void> {
     const conn = this.connections.get(connId);
     if (!conn) return;
@@ -108,5 +130,14 @@ export async function notifyPollChanged(publicId: string): Promise<void> {
     await env.POLL_ROOM.getByName(publicId).notifyChange();
   } catch (err) {
     console.error("poll-room notify failed", { publicId, error: String(err) });
+  }
+}
+
+/** Fire-and-forget: (re)arm the poll's close alarm; null cancels. Never throws. */
+export async function schedulePollClose(publicId: string, expiresAt: Date | null): Promise<void> {
+  try {
+    await env.POLL_ROOM.getByName(publicId).scheduleClose(expiresAt?.getTime() ?? null);
+  } catch (err) {
+    console.error("poll-room schedule failed", { publicId, error: String(err) });
   }
 }

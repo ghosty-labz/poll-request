@@ -1,6 +1,10 @@
 import { useMemo, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import type { CreatePollRequest, CreatePollResponse } from "#/lib/poll/contracts";
+import type {
+  CreatePollRequest,
+  CreatePollResponse,
+  PollDurationHours,
+} from "#/lib/poll/contracts";
 import { LivePreview } from "./LivePreview";
 import { OptionsEditor } from "./OptionsEditor";
 import { PollRules } from "./PollRules";
@@ -14,6 +18,7 @@ const INITIAL_DRAFT: PollDraft = {
     { id: 2, text: "" },
   ],
   format: "single",
+  durationHours: 24,
   anon: true,
   allowChanges: false,
   showResults: true,
@@ -21,7 +26,8 @@ const INITIAL_DRAFT: PollDraft = {
 
 /**
  * The full Create Poll experience: editable draft on the left, live preview on
- * the right. Submits the supported fields (title + options) to POST /api/polls.
+ * the right. Submits the supported fields (title, duration + options) to
+ * POST /api/polls.
  *
  * Note: format & rule toggles are captured in the UI but not yet persisted —
  * the backend contract currently accepts title, description, expiry & options.
@@ -65,6 +71,9 @@ export function CreatePollForm() {
 
   const setFormat = (format: PollFormat) => setDraft((d) => ({ ...d, format }));
 
+  const setDuration = (durationHours: PollDurationHours) =>
+    setDraft((d) => ({ ...d, durationHours }));
+
   const toggle = (key: "anon" | "allowChanges" | "showResults") =>
     setDraft((d) => ({ ...d, [key]: !d[key] }));
 
@@ -75,6 +84,7 @@ export function CreatePollForm() {
     try {
       const body: CreatePollRequest = {
         title: draft.question.trim(),
+        durationHours: draft.durationHours,
         options: draft.options
           .filter((o) => o.text.trim())
           .map((o) => ({ text: o.text.trim() })),
@@ -124,7 +134,12 @@ export function CreatePollForm() {
           onAddOption={addOption}
           onRemoveOption={removeOption}
         />
-        <PollRules draft={draft} onFormatChange={setFormat} onToggle={toggle} />
+        <PollRules
+          draft={draft}
+          onFormatChange={setFormat}
+          onDurationChange={setDuration}
+          onToggle={toggle}
+        />
 
         <div className="flex flex-wrap items-center gap-[18px]">
           <button
