@@ -53,6 +53,31 @@ export interface PollView {
   viewer: PollViewerContext;
 }
 
+/**
+ * A poll as it appears in the creator's "your polls" list
+ * (`GET /api/polls`). Slimmer than `PollView` — no per-option data.
+ * The same visibility rule applies: `totalVotes` is null until the
+ * viewer has voted or the poll has expired.
+ */
+export interface PollSummary {
+  id: string;
+  title: string;
+  description: string | null;
+
+  createdAt: string;
+  expiresAt: string;
+  isExpired: boolean;
+
+  optionCount: number;
+  totalVotes: number | null;
+  hasVoted: boolean;
+}
+
+/** Response body for `GET /api/polls` — polls created by this browser's identity. */
+export interface ListMyPollsResponse {
+  polls: PollSummary[];
+}
+
 /** Request body for `POST /api/polls`. */
 export interface CreatePollRequest {
   title: string;

@@ -1,4 +1,4 @@
-import { and, asc, count, eq, isNull } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, isNull } from "drizzle-orm";
 
 import type { Database } from "#/db/index";
 import {
@@ -40,6 +40,60 @@ export async function findPollByPublicId(
     .where(and(eq(polls.publicId, publicId), isNull(polls.deletedAt)))
     .limit(1);
   return rows[0];
+}
+
+/** Live (non-deleted) polls created by an identity, newest first. */
+export async function findPollsByCreatorId(
+  db: Database,
+  creatorId: string,
+): Promise<Poll[]> {
+  return db
+    .select()
+    .from(polls)
+    .where(and(eq(polls.creatorId, creatorId), isNull(polls.deletedAt)))
+    .orderBy(desc(polls.createdAt));
+}
+
+/** Total vote count per poll, as a Map keyed by pollId. */
+export async function countVotesByPoll(
+  db: Database,
+  pollIds: string[],
+): Promise<Map<string, number>> {
+  if (pollIds.length === 0) return new Map();
+  const rows = await db
+    .select({ pollId: votes.pollId, total: count() })
+    .from(votes)
+    .where(inArray(votes.pollId, pollIds))
+    .groupBy(votes.pollId);
+  return new Map(rows.map((r) => [r.pollId, r.total]));
+}
+
+/** Option count per poll, as a Map keyed by pollId. */
+export async function countOptionsByPoll(
+  db: Database,
+  pollIds: string[],
+): Promise<Map<string, number>> {
+  if (pollIds.length === 0) return new Map();
+  const rows = await db
+    .select({ pollId: pollOptions.pollId, total: count() })
+    .from(pollOptions)
+    .where(inArray(pollOptions.pollId, pollIds))
+    .groupBy(pollOptions.pollId);
+  return new Map(rows.map((r) => [r.pollId, r.total]));
+}
+
+/** The subset of pollIds this voter has voted on. */
+export async function findVotedPollIds(
+  db: Database,
+  pollIds: string[],
+  voterToken: string,
+): Promise<Set<string>> {
+  if (pollIds.length === 0) return new Set();
+  const rows = await db
+    .select({ pollId: votes.pollId })
+    .from(votes)
+    .where(and(inArray(votes.pollId, pollIds), eq(votes.voterToken, voterToken)));
+  return new Set(rows.map((r) => r.pollId));
 }
 
 /** Options for a poll, in display order. */

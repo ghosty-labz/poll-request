@@ -1,0 +1,1 @@
+CREATE INDEX `polls_creator_idx` ON `polls` (`creator_id`);

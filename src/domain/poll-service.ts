@@ -1,9 +1,13 @@
 import { getDb } from "#/db/index";
 import {
+  countOptionsByPoll,
   countVotesByOption,
+  countVotesByPoll,
   findOptionsByPollId,
   findPollByPublicId,
+  findPollsByCreatorId,
   findVote,
+  findVotedPollIds,
   insertPollWithOptions,
   softDeletePoll,
   updatePollFields,
@@ -13,8 +17,8 @@ import type { NewPoll, NewPollOption, Poll, PollOption } from "#/db/schema";
 import { notifyPollChanged } from "#/durable-objects/poll-room";
 import { badRequest, conflict, forbidden, notFound } from "#/lib/errors";
 import { newId, newToken } from "#/lib/ids";
-import type { CreatePollResponse, PollView } from "#/lib/poll/contracts";
-import { projectPollView } from "./poll-projector";
+import type { CreatePollResponse, PollSummary, PollView } from "#/lib/poll/contracts";
+import { projectPollSummary, projectPollView } from "./poll-projector";
 
 const DEFAULT_DURATION_MS = 36 * 60 * 60 * 1000; // 36 hours
 const MAX_OPTIONS = 20;
@@ -66,6 +70,33 @@ export async function createPoll(
     shareUrl: `${origin}/polls/${publicId}`,
     manageUrl: `${origin}/polls/${publicId}?key=${managementKey}`,
   };
+}
+
+/**
+ * List the live polls created by this identity, newest first. Only the cookie
+ * identity can list — there is no management-key path here, since keys are
+ * per-poll and this endpoint spans all of a browser's polls.
+ */
+export async function listMyPolls(identitySub: string): Promise<PollSummary[]> {
+  const db = getDb();
+  const myPolls = await findPollsByCreatorId(db, identitySub);
+  if (myPolls.length === 0) return [];
+
+  const pollIds = myPolls.map((p) => p.id);
+  const [voteTotals, optionTotals, votedPollIds] = await Promise.all([
+    countVotesByPoll(db, pollIds),
+    countOptionsByPoll(db, pollIds),
+    findVotedPollIds(db, pollIds, identitySub),
+  ]);
+
+  return myPolls.map((poll) =>
+    projectPollSummary({
+      poll,
+      optionCount: optionTotals.get(poll.id) ?? 0,
+      totalVotes: voteTotals.get(poll.id) ?? 0,
+      hasVoted: votedPollIds.has(poll.id),
+    }),
+  );
 }
 
 /** Build the PollView for a viewer. Decides result visibility internally. */

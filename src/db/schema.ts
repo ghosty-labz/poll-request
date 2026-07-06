@@ -1,4 +1,4 @@
-import { integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 import { newId, newToken } from "#/lib/ids";
 
@@ -46,7 +46,12 @@ export const polls = sqliteTable("polls", {
     .$onUpdateFn(() => new Date()),
   /** Soft-delete marker. Null = live; non-null = excluded from normal queries. */
   deletedAt: integer("deleted_at", { mode: "timestamp_ms" }),
-});
+  },
+  (table) => [
+    // "Your polls" listing looks up by creator identity.
+    index("polls_creator_idx").on(table.creatorId),
+  ],
+);
 
 export const pollOptions = sqliteTable("poll_options", {
   id: text("id").primaryKey().$defaultFn(newId),

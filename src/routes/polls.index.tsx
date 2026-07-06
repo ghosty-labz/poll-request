@@ -1,12 +1,12 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
-import { CreatePollForm } from "#/components/create-poll/CreatePollForm";
+import { MyPollsList } from "#/components/my-polls/MyPollsList";
 
-export const Route = createFileRoute("/polls/new")({ component: NewPollPage });
+export const Route = createFileRoute("/polls/")({ component: MyPollsPage });
 
-function NewPollPage() {
+function MyPollsPage() {
   return (
     <div className="min-h-screen bg-cream font-plex text-ink">
-      <div className="mx-auto max-w-[1180px]">
+      <div className="mx-auto max-w-[860px]">
         {/* nav */}
         <div className="flex items-center justify-between border-b-2 border-ink px-11 py-[22px]">
           <Link to="/" className="flex items-center gap-[11px] no-underline">
@@ -18,35 +18,32 @@ function NewPollPage() {
             </span>
           </Link>
           <div className="flex items-center gap-6 font-plex text-[13px] font-medium text-[#5c6356]">
-            <Link to="/polls" className="no-underline text-[#5c6356]">
-              my_polls
+            <span className="text-ink">$ poll list --mine</span>
+            <Link
+              to="/polls/new"
+              className="inline-flex items-center gap-2 rounded-md bg-ink px-4 py-2 font-plex text-[13px] font-bold text-neon no-underline shadow-[3px_3px_0_var(--color-neon)]"
+            >
+              Open a poll →
             </Link>
-            <span className="text-ink">$ poll init</span>
-            <span className="inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border-2 border-ink bg-neon font-plex text-[13px] font-bold text-ink">
-              D
-            </span>
           </div>
         </div>
 
         {/* header */}
         <div className="px-11 pb-[30px] pt-12">
           <div className="mb-[22px] inline-block rounded-md border-2 border-ink bg-neon px-[10px] py-1 font-plex text-xs font-semibold tracking-[0.04em] text-ink">
-            // new poll request
+            // your polls
           </div>
-          <h1 className="m-0 font-pixel text-[26px] leading-[1.4] text-ink">
-            Open a Poll
-            <br />
-            Request
-          </h1>
+          <h1 className="m-0 font-pixel text-[26px] leading-[1.4] text-ink">Your Polls</h1>
           <p className="m-0 mt-[22px] max-w-[520px] font-plex text-[15px] leading-[1.7] text-[#54594c]">
-            Draft your question, stack the options, set the rules. Hit create
-            and you’ll get one link to drop wherever your team lurks.
+            Every poll opened from this browser. No account behind this — if
+            you clear cookies or switch devices, use a poll’s manage link to
+            get back in.
           </p>
         </div>
 
-        {/* form + preview */}
+        {/* list */}
         <div className="px-11 pb-[70px] pt-2">
-          <CreatePollForm />
+          <MyPollsList />
         </div>
       </div>
     </div>

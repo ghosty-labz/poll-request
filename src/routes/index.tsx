@@ -194,6 +194,13 @@ function App() {
             <span className="pr-nav-link">how_it_works</span>
             <span className="pr-nav-link">features</span>
             <Link
+              to="/polls"
+              className="pr-nav-link"
+              style={{ color: "inherit", textDecoration: "none" }}
+            >
+              my_polls
+            </Link>
+            <Link
               to="/polls/new"
               className="pr-nav-cta inline-flex gap-2"
               style={{

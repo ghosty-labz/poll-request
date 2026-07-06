@@ -1,5 +1,5 @@
 import type { Poll, PollOption } from "#/db/schema";
-import type { PollView } from "#/lib/poll/contracts";
+import type { PollSummary, PollView } from "#/lib/poll/contracts";
 
 /** Everything the projector needs to build a PollView. */
 export interface ProjectionInput {
@@ -56,6 +56,42 @@ export function projectPollView(input: ProjectionInput): PollView {
       selectedOptionId: viewerOptionId,
       canManage,
     },
+  };
+}
+
+/** Everything the projector needs to build a PollSummary. */
+export interface SummaryProjectionInput {
+  poll: Poll;
+  optionCount: number;
+  totalVotes: number;
+  /** Whether this viewer has voted on the poll. */
+  hasVoted: boolean;
+  /** Evaluation time (injectable for testing). */
+  now?: Date;
+}
+
+/**
+ * Projects the list-item shape for the creator's "your polls" page. Enforces
+ * the same visibility rule as `projectPollView`: the vote total is revealed
+ * only once the viewer has voted OR the poll has expired.
+ */
+export function projectPollSummary(input: SummaryProjectionInput): PollSummary {
+  const { poll, optionCount, totalVotes, hasVoted } = input;
+  const now = input.now ?? new Date();
+
+  const isExpired = poll.expiresAt.getTime() <= now.getTime();
+  const resultsVisible = hasVoted || isExpired;
+
+  return {
+    id: poll.publicId,
+    title: poll.title,
+    description: poll.description,
+    createdAt: poll.createdAt.toISOString(),
+    expiresAt: poll.expiresAt.toISOString(),
+    isExpired,
+    optionCount,
+    totalVotes: resultsVisible ? totalVotes : null,
+    hasVoted,
   };
 }
 

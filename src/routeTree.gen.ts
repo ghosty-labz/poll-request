@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as PollsIndexRouteImport } from './routes/polls.index'
 import { Route as PollsNewRouteImport } from './routes/polls.new'
 import { Route as PollsPublicIdRouteImport } from './routes/polls.$publicId'
 import { Route as PollsSplatRouteImport } from './routes/polls.$'
@@ -27,6 +28,11 @@ const AboutRoute = AboutRouteImport.update({
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PollsIndexRoute = PollsIndexRouteImport.update({
+  id: '/polls/',
+  path: '/polls/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const PollsNewRoute = PollsNewRouteImport.update({
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/polls/$': typeof PollsSplatRoute
   '/polls/$publicId': typeof PollsPublicIdRoute
   '/polls/new': typeof PollsNewRoute
+  '/polls/': typeof PollsIndexRoute
   '/api/polls/$publicId': typeof ApiPollsPublicIdRouteWithChildren
   '/api/polls/$publicId/events': typeof ApiPollsPublicIdEventsRoute
   '/api/polls/$publicId/vote': typeof ApiPollsPublicIdVoteRoute
@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
   '/polls/$': typeof PollsSplatRoute
   '/polls/$publicId': typeof PollsPublicIdRoute
   '/polls/new': typeof PollsNewRoute
+  '/polls': typeof PollsIndexRoute
   '/api/polls/$publicId': typeof ApiPollsPublicIdRouteWithChildren
   '/api/polls/$publicId/events': typeof ApiPollsPublicIdEventsRoute
   '/api/polls/$publicId/vote': typeof ApiPollsPublicIdVoteRoute
@@ -95,6 +103,7 @@ export interface FileRoutesById {
   '/polls/$': typeof PollsSplatRoute
   '/polls/$publicId': typeof PollsPublicIdRoute
   '/polls/new': typeof PollsNewRoute
+  '/polls/': typeof PollsIndexRoute
   '/api/polls/$publicId': typeof ApiPollsPublicIdRouteWithChildren
   '/api/polls/$publicId/events': typeof ApiPollsPublicIdEventsRoute
   '/api/polls/$publicId/vote': typeof ApiPollsPublicIdVoteRoute
@@ -108,6 +117,7 @@ export interface FileRouteTypes {
     | '/polls/$'
     | '/polls/$publicId'
     | '/polls/new'
+    | '/polls/'
     | '/api/polls/$publicId'
     | '/api/polls/$publicId/events'
     | '/api/polls/$publicId/vote'
@@ -119,6 +129,7 @@ export interface FileRouteTypes {
     | '/polls/$'
     | '/polls/$publicId'
     | '/polls/new'
+    | '/polls'
     | '/api/polls/$publicId'
     | '/api/polls/$publicId/events'
     | '/api/polls/$publicId/vote'
@@ -130,6 +141,7 @@ export interface FileRouteTypes {
     | '/polls/$'
     | '/polls/$publicId'
     | '/polls/new'
+    | '/polls/'
     | '/api/polls/$publicId'
     | '/api/polls/$publicId/events'
     | '/api/polls/$publicId/vote'
@@ -142,6 +154,7 @@ export interface RootRouteChildren {
   PollsSplatRoute: typeof PollsSplatRoute
   PollsPublicIdRoute: typeof PollsPublicIdRoute
   PollsNewRoute: typeof PollsNewRoute
+  PollsIndexRoute: typeof PollsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -158,6 +171,13 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/polls/': {
+      id: '/polls/'
+      path: '/polls'
+      fullPath: '/polls/'
+      preLoaderRoute: typeof PollsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/polls/new': {
@@ -244,6 +264,7 @@ const rootRouteChildren: RootRouteChildren = {
   PollsSplatRoute: PollsSplatRoute,
   PollsPublicIdRoute: PollsPublicIdRoute,
   PollsNewRoute: PollsNewRoute,
+  PollsIndexRoute: PollsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
