@@ -9,7 +9,12 @@ import { LivePreview } from "./LivePreview";
 import { OptionsEditor } from "./OptionsEditor";
 import { PollRules } from "./PollRules";
 import { QuestionField } from "./QuestionField";
-import { MAX_OPTIONS, MIN_OPTIONS, type PollDraft, type PollFormat } from "./types";
+import {
+  MAX_OPTIONS,
+  MIN_OPTIONS,
+  type PollDraft,
+  type PollFormat,
+} from "./types";
 
 const INITIAL_DRAFT: PollDraft = {
   question: "",
@@ -20,8 +25,8 @@ const INITIAL_DRAFT: PollDraft = {
   format: "single",
   durationHours: 24,
   anon: true,
-  allowChanges: false,
-  showResults: true,
+  allowChanges: true,
+  showResults: false,
 };
 
 /**
@@ -44,7 +49,8 @@ export function CreatePollForm() {
     () => draft.options.filter((o) => o.text.trim()).length,
     [draft.options],
   );
-  const canCreate = Boolean(draft.question.trim()) && filledOptions >= MIN_OPTIONS;
+  const canCreate =
+    Boolean(draft.question.trim()) && filledOptions >= MIN_OPTIONS;
 
   const setQuestion = (question: string) =>
     setDraft((d) => ({ ...d, question }));
@@ -95,7 +101,9 @@ export function CreatePollForm() {
         body: JSON.stringify(body),
       });
       if (!res.ok) {
-        const data = (await res.json().catch(() => null)) as { message?: string } | null;
+        const data = (await res.json().catch(() => null)) as {
+          message?: string;
+        } | null;
         throw new Error(data?.message ?? `Request failed (${res.status})`);
       }
       const data = (await res.json()) as CreatePollResponse;
@@ -103,7 +111,8 @@ export function CreatePollForm() {
 
       // Carry the management key forward — it's returned only once, at creation.
       // Landing on the poll screen with the key unlocks the manager controls.
-      const managementKey = new URL(data.manageUrl).searchParams.get("key") ?? undefined;
+      const managementKey =
+        new URL(data.manageUrl).searchParams.get("key") ?? undefined;
       await navigate({
         to: "/polls/$publicId",
         params: { publicId: data.poll.id },
@@ -150,7 +159,9 @@ export function CreatePollForm() {
           >
             {submitting ? "pushing…" : "$ poll push →"}
           </button>
-          <span className="font-plex text-xs font-medium text-[#9aa091]">{createHint}</span>
+          <span className="font-plex text-xs font-medium text-[#9aa091]">
+            {createHint}
+          </span>
         </div>
 
         {error && (

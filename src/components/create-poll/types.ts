@@ -59,7 +59,11 @@ export const RULE_TOGGLES: Array<{
   label: string;
   hint: string;
 }> = [
-  { key: "anon", label: "Anonymous voting", hint: "No names attached to votes." },
+  {
+    key: "anon",
+    label: "Anonymous voting",
+    hint: "No names attached to votes.",
+  },
   {
     key: "allowChanges",
     label: "Allow vote changes",
@@ -79,5 +83,7 @@ export const FORMAT_LABELS: Record<PollFormat, string> = {
 };
 
 export function placeholderFor(index: number): string {
-  return OPTION_PLACEHOLDERS[index] ?? `Option ${OPTION_LETTERS[index] ?? index + 1}`;
+  return (
+    OPTION_PLACEHOLDERS[index] ?? `Option ${OPTION_LETTERS[index] ?? index + 1}`
+  );
 }

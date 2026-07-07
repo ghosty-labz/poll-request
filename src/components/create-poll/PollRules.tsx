@@ -16,7 +16,12 @@ interface PollRulesProps {
 }
 
 /** Step 03 — voting format, poll length + behaviour toggles. */
-export function PollRules({ draft, onFormatChange, onDurationChange, onToggle }: PollRulesProps) {
+export function PollRules({
+  draft,
+  onFormatChange,
+  onDurationChange,
+  onToggle,
+}: PollRulesProps) {
   return (
     <FormCard>
       <StepLabel className="mb-4 block">03 · Rules</StepLabel>
@@ -34,11 +39,17 @@ export function PollRules({ draft, onFormatChange, onDurationChange, onToggle }:
               onClick={() => onFormatChange(fmt.key)}
               aria-pressed={active}
               className={`rounded-lg border-2 border-ink px-3 py-[13px] text-center transition-shadow ${
-                active ? "bg-neon shadow-[3px_3px_0_var(--color-ink)]" : "bg-white text-[#54594c]"
+                active
+                  ? "bg-neon shadow-[3px_3px_0_var(--color-ink)]"
+                  : "bg-white text-[#54594c]"
               }`}
             >
-              <div className="mb-1 font-plex text-[13px] font-bold">{fmt.label}</div>
-              <div className="font-plex text-[10px] leading-[1.4] opacity-70">{fmt.hint}</div>
+              <div className="mb-1 font-plex text-[13px] font-bold">
+                {fmt.label}
+              </div>
+              <div className="font-plex text-[10px] leading-[1.4] opacity-70">
+                {fmt.hint}
+              </div>
             </button>
           );
         })}
@@ -57,11 +68,17 @@ export function PollRules({ draft, onFormatChange, onDurationChange, onToggle }:
               onClick={() => onDurationChange(dur.hours)}
               aria-pressed={active}
               className={`rounded-lg border-2 border-ink px-3 py-[13px] text-center transition-shadow ${
-                active ? "bg-neon shadow-[3px_3px_0_var(--color-ink)]" : "bg-white text-[#54594c]"
+                active
+                  ? "bg-neon shadow-[3px_3px_0_var(--color-ink)]"
+                  : "bg-white text-[#54594c]"
               }`}
             >
-              <div className="mb-1 font-plex text-[13px] font-bold">{dur.label}</div>
-              <div className="font-plex text-[10px] leading-[1.4] opacity-70">{dur.hint}</div>
+              <div className="mb-1 font-plex text-[13px] font-bold">
+                {dur.label}
+              </div>
+              <div className="font-plex text-[10px] leading-[1.4] opacity-70">
+                {dur.hint}
+              </div>
             </button>
           );
         })}
@@ -72,6 +89,7 @@ export function PollRules({ draft, onFormatChange, onDurationChange, onToggle }:
           const on = draft[t.key];
           return (
             <button
+              disabled
               type="button"
               key={t.key}
               onClick={() => onToggle(t.key)}
