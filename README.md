@@ -1,206 +1,136 @@
-Welcome to your new TanStack Start app! 
+# Poll Request
 
-# Getting Started
+An anonymous, real-time polling app for settling team decisions without an account or a long thread. Create a poll, share its link, and watch results update live.
 
-To run this application:
+Built with TanStack Start, React, Cloudflare Workers, D1, Drizzle ORM, and Durable Objects.
+
+## Features
+
+- Create a single-choice poll with 2–10 options and a 1-, 3-, or 24-hour lifetime.
+- Share a public voting link and a separate management link.
+- Vote anonymously; one browser identity can change its vote.
+- Keep vote totals hidden until a visitor votes or the poll closes.
+- Stream result changes to eligible viewers with Server-Sent Events and a Durable Object per poll.
+- Manage a poll from its creator browser or with the management key in the management URL.
+- Browse polls created from the current browser in **My polls**.
+
+> Save the management URL when creating a poll. Its key is returned only once and is the recovery path for managing the poll from another browser.
+
+## Stack
+
+- [TanStack Start](https://tanstack.com/start) and [React](https://react.dev/)
+- [Cloudflare Workers](https://workers.cloudflare.com/), D1, and Durable Objects
+- [Drizzle ORM](https://orm.drizzle.team/) with SQLite/D1
+- Tailwind CSS
+
+## Prerequisites
+
+- Node.js 20+
+- A Cloudflare account with a D1 database for development/deployment
+
+## Local development
+
+Install dependencies:
 
 ```bash
 npm install
+```
+
+The Drizzle commands read Cloudflare credentials from `.env.local`. Create that file locally (do not commit it):
+
+```dotenv
+CLOUDFLARE_ACCOUNT_ID=your-account-id
+CLOUDFLARE_DATABASE_ID=your-d1-database-id
+CLOUDFLARE_D1_TOKEN=your-cloudflare-api-token
+```
+
+Ensure the D1 binding in `wrangler.jsonc` points at that database, then apply the schema:
+
+```bash
+npm run db:push
+```
+
+Start the app at [http://localhost:3000](http://localhost:3000):
+
+```bash
 npm run dev
 ```
 
-# Building For Production
+The app uses an insecure built-in JWT secret in development. Set a real `JWT_SECRET` before deploying.
 
-To build this application for production:
+## Commands
 
-```bash
-npm run build
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Run the Vite development server on port 3000. |
+| `npm run build` | Create a production build. |
+| `npm run preview` | Preview the production build. |
+| `npm run test` | Run the Vitest suite. |
+| `npm run generate-routes` | Regenerate TanStack Router routes. |
+| `npm run db:generate` | Generate a Drizzle migration from the schema. |
+| `npm run db:push` | Push the Drizzle schema to D1. |
+| `npm run db:studio` | Open Drizzle Studio for the configured D1 database. |
+| `npm run deploy` | Build and deploy to Cloudflare Workers. |
+
+## Deploying
+
+1. Create or select a Cloudflare D1 database and update its binding in `wrangler.jsonc`.
+2. Configure `.env.local` with credentials and run `npm run db:push` to apply the schema.
+3. Authenticate Wrangler if needed:
+
+   ```bash
+   npx wrangler login
+   ```
+
+4. Set the production identity-signing secret:
+
+   ```bash
+   npx wrangler secret put JWT_SECRET
+   ```
+
+5. Deploy:
+
+   ```bash
+   npm run deploy
+   ```
+
+`wrangler.jsonc` also declares the `POLL_ROOM` Durable Object binding and its migration. Keep that binding and migration configuration in place: it powers the live result stream and expiry alarms.
+
+## How it works
+
+Every visitor receives an anonymous, signed `pr_identity` HttpOnly cookie when they use a poll API. That identity is used to enforce one vote per poll and to recognize the poll creator. No user account is required.
+
+A poll has two URLs:
+
+- **Share URL** — public; anyone with it can vote.
+- **Management URL** — contains a high-entropy management key and unlocks editing or deletion outside the creator browser.
+
+D1 is the source of truth for polls, options, and votes. Each poll also has a Durable Object that holds active SSE connections, publishes changed poll views after mutations, and uses an alarm to push the final results when a poll expires.
+
+## API overview
+
+All poll responses use the `PollView` projection rather than exposing database rows directly. Counts and percentages are `null` until the viewer has voted or the poll has expired.
+
+| Endpoint | Purpose |
+| --- | --- |
+| `POST /api/polls` | Create a poll. Returns the poll, share URL, and one-time management URL. |
+| `GET /api/polls` | List polls created by the current browser identity. |
+| `GET /api/polls/:publicId` | Fetch a poll view. |
+| `PATCH /api/polls/:publicId` | Update title, description, or expiry. Requires creator identity or `X-Poll-Management-Key`. |
+| `DELETE /api/polls/:publicId` | Soft-delete a poll. Requires manager access. |
+| `POST /api/polls/:publicId/vote` | Cast or change the current browser's vote. |
+| `GET /api/polls/:publicId/events` | Open the Server-Sent Events stream for live updates. |
+
+## Project layout
+
+```text
+src/
+├── components/          # Create-poll, poll-view, and My Polls UI
+├── db/                  # Drizzle schema and repositories
+├── domain/              # Validation, authorization, and PollView projection
+├── durable-objects/     # Per-poll SSE room and expiration alarm
+├── lib/auth/            # Anonymous identity cookie and JWT implementation
+└── routes/              # TanStack file routes and API handlers
 ```
 
-## Testing
-
-This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:
-
-```bash
-npm run test
-```
-
-## Styling
-
-This project uses [Tailwind CSS](https://tailwindcss.com/) for styling.
-
-### Removing Tailwind CSS
-
-If you prefer not to use Tailwind CSS:
-
-1. Remove the demo pages in `src/routes/demo/`
-2. Replace the Tailwind import in `src/styles.css` with your own styles
-3. Remove `tailwindcss()` from the plugins array in `vite.config.ts`
-4. Uninstall the packages: `npm install @tailwindcss/vite tailwindcss -D`
-
-
-## Deploy to Cloudflare Workers
-
-This project uses the Cloudflare Vite plugin (configured in `vite.config.ts`) and `wrangler.jsonc`:
-
-1. Install Wrangler: `npm install -g wrangler`
-2. Authenticate: `wrangler login`
-3. Deploy: `npx wrangler deploy`
-
-For production env vars, run `wrangler secret put MY_VAR` for each secret listed in `.env.example`. Public (non-secret) vars go in `wrangler.jsonc` under `vars`.
-
-KV, D1, R2, and Durable Object bindings are configured in `wrangler.jsonc` — see https://developers.cloudflare.com/workers/wrangler/configuration/.
-
-
-
-## Routing
-
-This project uses [TanStack Router](https://tanstack.com/router) with file-based routing. Routes are managed as files in `src/routes`.
-
-### Adding A Route
-
-To add a new route to your application just add a new file in the `./src/routes` directory.
-
-TanStack will automatically generate the content of the route file for you.
-
-Now that you have two routes you can use a `Link` component to navigate between them.
-
-### Adding Links
-
-To use SPA (Single Page Application) navigation you will need to import the `Link` component from `@tanstack/react-router`.
-
-```tsx
-import { Link } from "@tanstack/react-router";
-```
-
-Then anywhere in your JSX you can use it like so:
-
-```tsx
-<Link to="/about">About</Link>
-```
-
-This will create a link that will navigate to the `/about` route.
-
-More information on the `Link` component can be found in the [Link documentation](https://tanstack.com/router/v1/docs/framework/react/api/router/linkComponent).
-
-### Using A Layout
-
-In the File Based Routing setup the layout is located in `src/routes/__root.tsx`. Anything you add to the root route will appear in all the routes. The route content will appear in the JSX where you render `{children}` in the `shellComponent`.
-
-Here is an example layout that includes a header:
-
-```tsx
-import { HeadContent, Scripts, createRootRoute } from '@tanstack/react-router'
-
-export const Route = createRootRoute({
-  head: () => ({
-    meta: [
-      { charSet: 'utf-8' },
-      { name: 'viewport', content: 'width=device-width, initial-scale=1' },
-      { title: 'My App' },
-    ],
-  }),
-  shellComponent: ({ children }) => (
-    <html lang="en">
-      <head>
-        <HeadContent />
-      </head>
-      <body>
-        <header>
-          <nav>
-            <Link to="/">Home</Link>
-            <Link to="/about">About</Link>
-          </nav>
-        </header>
-        {children}
-        <Scripts />
-      </body>
-    </html>
-  ),
-})
-```
-
-More information on layouts can be found in the [Layouts documentation](https://tanstack.com/router/latest/docs/framework/react/guide/routing-concepts#layouts).
-
-## Server Functions
-
-TanStack Start provides server functions that allow you to write server-side code that seamlessly integrates with your client components.
-
-```tsx
-import { createServerFn } from '@tanstack/react-start'
-
-const getServerTime = createServerFn({
-  method: 'GET',
-}).handler(async () => {
-  return new Date().toISOString()
-})
-
-// Use in a component
-function MyComponent() {
-  const [time, setTime] = useState('')
-  
-  useEffect(() => {
-    getServerTime().then(setTime)
-  }, [])
-  
-  return <div>Server time: {time}</div>
-}
-```
-
-## API Routes
-
-You can create API routes by using the `server` property in your route definitions:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-import { json } from '@tanstack/react-start'
-
-export const Route = createFileRoute('/api/hello')({
-  server: {
-    handlers: {
-      GET: () => json({ message: 'Hello, World!' }),
-    },
-  },
-})
-```
-
-## Data Fetching
-
-There are multiple ways to fetch data in your application. You can use TanStack Query to fetch data from a server. But you can also use the `loader` functionality built into TanStack Router to load the data for a route before it's rendered.
-
-For example:
-
-```tsx
-import { createFileRoute } from '@tanstack/react-router'
-
-export const Route = createFileRoute('/people')({
-  loader: async () => {
-    const response = await fetch('https://swapi.dev/api/people')
-    return response.json()
-  },
-  component: PeopleComponent,
-})
-
-function PeopleComponent() {
-  const data = Route.useLoaderData()
-  return (
-    <ul>
-      {data.results.map((person) => (
-        <li key={person.name}>{person.name}</li>
-      ))}
-    </ul>
-  )
-}
-```
-
-Loaders simplify your data fetching logic dramatically. Check out more information in the [Loader documentation](https://tanstack.com/router/latest/docs/framework/react/guide/data-loading#loader-parameters).
-
-# Demo files
-
-Files prefixed with `demo` can be safely deleted. They are there to provide a starting point for you to play around with the features you've installed.
-
-# Learn More
-
-You can learn more about all of the offerings from TanStack in the [TanStack documentation](https://tanstack.com).
-
-For TanStack Start specific documentation, visit [TanStack Start](https://tanstack.com/start).
+The API handlers stay thin: they resolve identity and HTTP concerns, then call the domain service. Result-visibility rules live in `src/domain/poll-projector.ts`, so vote counts are never exposed accidentally by another endpoint.
