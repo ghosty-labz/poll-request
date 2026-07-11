@@ -11,7 +11,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ```bash
 npm run dev              # vite dev server on :3000
 npm run build             # production build
-npm run test               # vitest run (no test files exist yet)
+npm run test               # vitest run (jsdom via vitest.config.ts; passes with no test files)
+npm run lint               # oxlint
+npm run typecheck          # tsc --noEmit (TypeScript 7)
 npm run db:generate        # drizzle-kit: generate a migration from schema.ts
 npm run db:push            # push schema directly to D1 (reads .env.local)
 npm run db:studio          # drizzle studio (reads .env.local)
@@ -20,7 +22,15 @@ npm run deploy              # build + wrangler deploy
 
 `db:push` and `db:studio` need `CLOUDFLARE_ACCOUNT_ID`, `CLOUDFLARE_DATABASE_ID`, `CLOUDFLARE_D1_TOKEN` in `.env.local` (see `drizzle.config.ts`). Production also needs `JWT_SECRET` set via `wrangler secret put JWT_SECRET` — without it the app falls back to an insecure dev secret (`src/lib/auth/identity.ts`).
 
-There is no lint script configured; TypeScript strict mode (`tsconfig.json`) is the main static check.
+Tests use a standalone `vitest.config.ts` (plain jsdom, no Cloudflare plugin) because the Cloudflare vite plugin rejects vitest's SSR environment settings.
+
+## Git workflow & releases
+
+- **Branches + PRs only.** `master` is protected by a ruleset (`protect-master`): no direct pushes, squash-merge only, the `checks` CI job must pass, no bypass. Work on a short-lived branch, open a PR, merge when green.
+- **CI** (`.github/workflows/ci.yml`) runs lint → typecheck → test on every PR. `build` is intentionally not part of the PR gate.
+- **Every merge to `master` is a release.** `.github/workflows/deploy.yml` re-runs lint → typecheck → test, then builds and runs `wrangler deploy` (needs the `CLOUDFLARE_API_TOKEN` repo secret). No tags, no versioning — `git log master` is the release history.
+- **Schema changes are manual and come first:** run `npm run db:push` (and verify) *before* merging a PR that changes `src/db/schema.ts`. The deploy workflow does not touch the database. When a dev/prod database split happens, graduate to committed drizzle migrations applied by the deploy workflow (`drizzle-kit generate` + `wrangler d1 migrations apply`).
+- The deployed Worker currently shares `dev-poll-request-db` with local dev — there is no separate production database yet.
 
 ## Architecture
 
