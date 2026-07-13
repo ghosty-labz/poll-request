@@ -1,55 +1,14 @@
-import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
 import type { PollSummary } from "#/lib/poll/contracts";
 import { StatusPill } from "#/components/poll-view/StatusPill";
-import { fetchMyPolls } from "./api";
-
-type Status = "loading" | "ready" | "error";
 
 /**
- * The creator's poll list. Identity is the HttpOnly cookie, so this can only
- * ever show polls made from this browser — polls created elsewhere (or after
- * the cookie was cleared) won't appear; their manage links still work.
+ * The creator's poll list, as loaded by the `/polls` route loader. Identity is
+ * the HttpOnly cookie, so this can only ever show polls made from this browser
+ * — polls created elsewhere (or after the cookie was cleared) won't appear;
+ * their manage links still work.
  */
-export function MyPollsList() {
-  const [polls, setPolls] = useState<PollSummary[]>([]);
-  const [status, setStatus] = useState<Status>("loading");
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    let alive = true;
-    fetchMyPolls()
-      .then((list) => {
-        if (!alive) return;
-        setPolls(list);
-        setStatus("ready");
-      })
-      .catch((err) => {
-        if (!alive) return;
-        setError(err instanceof Error ? err.message : "Could not load your polls.");
-        setStatus("error");
-      });
-    return () => {
-      alive = false;
-    };
-  }, []);
-
-  if (status === "loading") {
-    return (
-      <div className="flex min-h-[30vh] items-center justify-center font-plex text-sm font-semibold text-[#9aa091]">
-        loading your polls…
-      </div>
-    );
-  }
-
-  if (status === "error") {
-    return (
-      <div className="rounded-lg border-2 border-[#ff4d5e] bg-[#ffecee] px-4 py-3 font-plex text-[13px] font-semibold text-[#9f3030]">
-        {error}
-      </div>
-    );
-  }
-
+export function MyPollsList({ polls }: { polls: PollSummary[] }) {
   if (polls.length === 0) {
     return (
       <div className="rounded-[14px] border-2 border-dashed border-[#c9c8b8] px-8 py-14 text-center">

@@ -4,11 +4,9 @@ import * as api from "./api";
 
 const REOPEN_DURATION_MS = 36 * 60 * 60 * 1000; // mirrors the backend default
 
-type Status = "loading" | "ready" | "error" | "deleted";
-
 export interface UsePoll {
-  view: PollView | null;
-  status: Status;
+  view: PollView;
+  deleted: boolean;
   error: string | null;
   busy: boolean;
   vote: (optionId: string) => void;
@@ -18,41 +16,26 @@ export interface UsePoll {
 }
 
 /**
- * Loads a poll, exposes voter + manager actions, and keeps results live via the
- * SSE stream once they're visible to this browser. `canManage` is pinned to the
- * authoritative keyed load — the (header-less) EventSource can't carry the key.
+ * Holds a poll's live state, seeded from the route loader's PollView (the
+ * caller remounts this hook per poll/key, so `initialView` is stable for the
+ * hook's lifetime). Exposes voter + manager actions and keeps results live via
+ * the SSE stream once they're visible to this browser. `canManage` is pinned
+ * to the authoritative keyed load — the (header-less) EventSource can't carry
+ * the key.
  */
-export function usePoll(publicId: string, key: string | null): UsePoll {
-  const [view, setView] = useState<PollView | null>(null);
-  const [status, setStatus] = useState<Status>("loading");
+export function usePoll(publicId: string, key: string | null, initialView: PollView): UsePoll {
+  const [view, setView] = useState(initialView);
+  const [deleted, setDeleted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [live, setLive] = useState(false);
-  const canManageRef = useRef(false);
+  const [live, setLive] = useState(initialView.viewer.hasVoted || initialView.isExpired);
+  const canManageRef = useRef(initialView.viewer.canManage);
 
   const adopt = useCallback((next: PollView) => {
     canManageRef.current = next.viewer.canManage;
     setView(next);
-    setStatus("ready");
     if (next.viewer.hasVoted || next.isExpired) setLive(true);
   }, []);
-
-  // Initial load.
-  useEffect(() => {
-    let alive = true;
-    setStatus("loading");
-    api
-      .fetchPoll(publicId, key)
-      .then((v) => alive && adopt(v))
-      .catch((err) => {
-        if (!alive) return;
-        setError(err instanceof Error ? err.message : "Could not load this poll.");
-        setStatus("error");
-      });
-    return () => {
-      alive = false;
-    };
-  }, [publicId, key, adopt]);
 
   // Live updates once results are visible to this browser's cookie.
   useEffect(() => {
@@ -110,7 +93,7 @@ export function usePoll(publicId: string, key: string | null): UsePoll {
     setError(null);
     try {
       await api.deletePoll(publicId, key);
-      setStatus("deleted");
+      setDeleted(true);
       return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not delete the poll.");
@@ -120,5 +103,5 @@ export function usePoll(publicId: string, key: string | null): UsePoll {
     }
   }, [publicId, key]);
 
-  return { view, status, error, busy, vote, closeVoting, reopenVoting, remove };
+  return { view, deleted, error, busy, vote, closeVoting, reopenVoting, remove };
 }
