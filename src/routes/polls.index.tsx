@@ -1,9 +1,14 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { MyPollsList } from "#/components/my-polls/MyPollsList";
+import { fetchMyPollsFn } from "#/server/poll-fns";
 
-export const Route = createFileRoute("/polls/")({ component: MyPollsPage });
+export const Route = createFileRoute("/polls/")({
+  loader: () => fetchMyPollsFn(),
+  component: MyPollsPage,
+});
 
 function MyPollsPage() {
+  const polls = Route.useLoaderData();
   return (
     <div className="min-h-screen bg-cream font-plex text-ink">
       <div className="mx-auto max-w-[860px]">
@@ -43,7 +48,7 @@ function MyPollsPage() {
 
         {/* list */}
         <div className="px-11 pb-[70px] pt-2">
-          <MyPollsList />
+          <MyPollsList polls={polls} />
         </div>
       </div>
     </div>

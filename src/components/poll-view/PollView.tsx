@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
+import type { PollView as PollViewData } from "#/lib/poll/contracts";
 import { ManagerBar } from "./ManagerBar";
 import { OptionRow } from "./OptionRow";
 import { PollNotFound } from "./PollNotFound";
@@ -11,13 +12,16 @@ interface PollViewProps {
   publicId: string;
   /** Management key from the URL; unlocks manager controls when valid. */
   managementKey: string | null;
+  /** The PollView loaded by the route loader; seeds the hook's live state. */
+  initialView: PollViewData;
 }
 
-export function PollView({ publicId, managementKey }: PollViewProps) {
+export function PollView({ publicId, managementKey, initialView }: PollViewProps) {
   const navigate = useNavigate();
-  const { view, status, error, busy, vote, closeVoting, reopenVoting, remove } = usePoll(
+  const { view, deleted, error, busy, vote, closeVoting, reopenVoting, remove } = usePoll(
     publicId,
     managementKey,
+    initialView,
   );
 
   const shareUrl = useMemo(
@@ -26,56 +30,50 @@ export function PollView({ publicId, managementKey }: PollViewProps) {
   );
 
   const leader = useMemo(() => {
-    if (!view || view.totalVotes === null) return null;
+    if (view.totalVotes === null) return null;
     const top = [...view.options].sort(
       (a, b) => (b.voteCount ?? 0) - (a.voteCount ?? 0),
     )[0];
     return top ? { label: top.text, pct: top.percentage ?? 0 } : null;
   }, [view]);
 
-  // A missing/deleted poll (dead share link) gets the full 404 screen.
-  if (status === "error" || status === "deleted") return <PollNotFound />;
+  // Once deleted the share link is dead — show the full 404 screen.
+  if (deleted) return <PollNotFound />;
 
   return (
     <div className="min-h-screen bg-cream font-plex text-ink">
       <div className="mx-auto max-w-[760px]">
         <Nav />
         <div className="px-7 pb-[70px] pt-[42px]">
-          {status === "loading" && <Centered>loading poll…</Centered>}
+          {view.viewer.canManage && (
+            <ManagerBar
+              expired={view.isExpired}
+              busy={busy}
+              shareUrl={shareUrl}
+              leader={leader}
+              onToggleStatus={view.isExpired ? reopenVoting : closeVoting}
+              onDelete={async () => {
+                if (!window.confirm("Delete this Poll Request? This cannot be undone.")) return;
+                if (await remove()) navigate({ to: "/" });
+              }}
+            />
+          )}
 
-          {status === "ready" && view && (
-            <>
-              {view.viewer.canManage && (
-                <ManagerBar
-                  expired={view.isExpired}
-                  busy={busy}
-                  shareUrl={shareUrl}
-                  leader={leader}
-                  onToggleStatus={view.isExpired ? reopenVoting : closeVoting}
-                  onDelete={async () => {
-                    if (!window.confirm("Delete this Poll Request? This cannot be undone.")) return;
-                    if (await remove()) navigate({ to: "/" });
-                  }}
-                />
-              )}
+          <PollCard
+            view={view}
+            onVote={vote}
+          />
 
-              <PollCard
-                view={view}
-                onVote={vote}
-              />
+          <ShareStrip url={shareUrl} />
 
-              <ShareStrip url={shareUrl} />
+          <div className="mt-6 text-center font-plex text-[11px] font-semibold text-[#9aa091]">
+            merge opinions, not conflicts · poll_request
+          </div>
 
-              <div className="mt-6 text-center font-plex text-[11px] font-semibold text-[#9aa091]">
-                merge opinions, not conflicts · poll_request
-              </div>
-
-              {error && (
-                <div className="mt-4 rounded-lg border-2 border-[#ff4d5e] bg-[#ffecee] px-4 py-3 font-plex text-[13px] font-semibold text-[#9f3030]">
-                  {error}
-                </div>
-              )}
-            </>
+          {error && (
+            <div className="mt-4 rounded-lg border-2 border-[#ff4d5e] bg-[#ffecee] px-4 py-3 font-plex text-[13px] font-semibold text-[#9f3030]">
+              {error}
+            </div>
           )}
         </div>
       </div>
@@ -87,7 +85,7 @@ function PollCard({
   view,
   onVote,
 }: {
-  view: NonNullable<ReturnType<typeof usePoll>["view"]>;
+  view: PollViewData;
   onVote: (optionId: string) => void;
 }) {
   const showResults = view.totalVotes !== null;
@@ -149,14 +147,6 @@ function Nav() {
         </span>
         <span className="font-plex text-[15px] font-bold text-ink">poll_request</span>
       </Link>
-    </div>
-  );
-}
-
-function Centered({ children }: { children: React.ReactNode }) {
-  return (
-    <div className="flex min-h-[40vh] items-center justify-center font-plex text-sm font-semibold text-[#9aa091]">
-      {children}
     </div>
   );
 }

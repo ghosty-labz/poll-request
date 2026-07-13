@@ -1,4 +1,7 @@
-/** Thin client for the poll endpoints, returning typed PollViews. */
+/**
+ * Thin client for the poll mutation endpoints, returning typed PollViews.
+ * Reads go through the route loaders (`#/server/poll-fns`) instead.
+ */
 
 import { MANAGEMENT_KEY_HEADER, type PollView } from "#/lib/poll/contracts";
 
@@ -27,10 +30,6 @@ async function asView(res: Response): Promise<PollView> {
     );
   }
   return (await res.json()) as PollView;
-}
-
-export function fetchPoll(publicId: string, key: string | null): Promise<PollView> {
-  return fetch(`/api/polls/${publicId}`, { headers: keyHeaders(key) }).then(asView);
 }
 
 export function castVote(publicId: string, optionId: string): Promise<PollView> {
