@@ -54,7 +54,7 @@ export function MyPollsList() {
     return (
       <div className="rounded-[14px] border-2 border-dashed border-[#c9c8b8] px-8 py-14 text-center">
         <div className="font-plex text-[15px] font-bold text-ink">No polls from this browser yet.</div>
-        <p className="mx-auto mt-3 max-w-[420px] font-plex text-[13px] leading-[1.7] text-[#54594c]">
+        <p className="mx-auto mt-3 max-w-105 font-plex text-[13px] leading-[1.7] text-[#54594c]">
           Polls you create here will show up in this list automatically — no
           account needed, your browser is the key.
         </p>
