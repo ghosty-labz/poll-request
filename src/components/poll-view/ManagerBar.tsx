@@ -45,17 +45,26 @@ export function ManagerBar({
             type="button"
             onClick={onToggleStatus}
             disabled={busy}
+            data-cuelume-hover="whisper"
+            data-cuelume-press="press"
             className="inline-flex items-center gap-[7px] rounded-lg border-2 border-neon bg-transparent px-[14px] py-[9px] font-plex text-xs font-bold text-neon transition-colors hover:enabled:bg-neon hover:enabled:text-ink disabled:opacity-50"
           >
             {expired ? "reopen voting" : "close voting"}
           </button>
-          <button type="button" onClick={copy} className={`${darkBtn} hover:border-neon`}>
+          <button
+            type="button"
+            onClick={copy}
+            data-cuelume-hover="whisper"
+            className={`${darkBtn} hover:border-neon`}
+          >
             {copied ? "copied ✓" : "copy link"}
           </button>
           <button
             type="button"
             onClick={onDelete}
             disabled={busy}
+            data-cuelume-hover="whisper"
+            data-cuelume-press="press"
             className={`${darkBtn} !text-[#ff8a93] hover:enabled:border-[#ff4d5e] hover:enabled:bg-[#ff4d5e] hover:enabled:!text-white`}
           >
             delete

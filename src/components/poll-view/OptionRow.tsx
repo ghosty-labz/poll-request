@@ -19,6 +19,11 @@ export function OptionRow({ option, showResults, votable, onVote }: OptionRowPro
       type="button"
       disabled={!votable}
       onClick={() => votable && onVote(option.id)}
+      // Gesture feedback only — the vote itself confirms with `success`
+      // from usePoll once the server accepts it.
+      {...(votable
+        ? { "data-cuelume-hover": "whisper", "data-cuelume-press": "press" }
+        : {})}
       className={`relative w-full overflow-hidden rounded-[10px] border-2 border-ink bg-cream px-4 py-[14px] text-left ${
         votable ? "cursor-pointer hover:bg-[#eafde3]" : "cursor-default opacity-[0.92]"
       }`}

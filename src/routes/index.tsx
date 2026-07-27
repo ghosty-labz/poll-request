@@ -1,6 +1,8 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { Ghost } from "lucide-react";
 import { useMemo, useState } from "react";
+import { SoundToggle } from "#/components/SoundToggle";
+import { play } from "#/lib/sound";
 
 export const Route = createFileRoute("/")({ component: App });
 
@@ -108,6 +110,7 @@ function App() {
       }
       return next;
     });
+    play(voted === key ? "tick" : "success");
     setVoted((prev) => (prev === key ? null : key));
   };
 
@@ -191,18 +194,26 @@ function App() {
               color: "#5c6356",
             }}
           >
-            <span className="pr-nav-link">how_it_works</span>
-            <span className="pr-nav-link">features</span>
+            <span className="pr-nav-link" data-cuelume-hover="whisper">
+              how_it_works
+            </span>
+            <span className="pr-nav-link" data-cuelume-hover="whisper">
+              features
+            </span>
             <Link
               to="/polls"
               className="pr-nav-link"
+              data-cuelume-hover="whisper"
               style={{ color: "inherit", textDecoration: "none" }}
             >
               my_polls
             </Link>
+            <SoundToggle />
             <Link
               to="/polls/new"
               className="pr-nav-cta inline-flex gap-2"
+              data-cuelume-hover="chime"
+              data-cuelume-press="press"
               style={{
                 cursor: "pointer",
                 alignItems: "center",
@@ -273,6 +284,8 @@ function App() {
               <Link
                 to="/polls/new"
                 className="pr-primary inline-flex gap-2"
+                data-cuelume-hover="chime"
+                data-cuelume-press="press"
                 style={{
                   cursor: "pointer",
                   alignItems: "center",
@@ -288,6 +301,8 @@ function App() {
               </Link>
               <span
                 className="pr-secondary"
+                data-cuelume-hover="whisper"
+                data-cuelume-press="press"
                 style={{
                   cursor: "pointer",
                   display: "inline-flex",
@@ -394,6 +409,8 @@ function App() {
                   key={opt.key}
                   className="pr-opt"
                   onClick={() => vote(opt.key)}
+                  data-cuelume-hover="whisper"
+                  data-cuelume-press="press"
                   style={{
                     cursor: "pointer",
                     border: `2px solid ${INK}`,
@@ -645,6 +662,8 @@ function App() {
             <Link
               to="/polls/new"
               className="pr-cta-btn inline-flex gap-2"
+              data-cuelume-hover="chime"
+              data-cuelume-press="press"
               style={{
                 cursor: "pointer",
                 alignItems: "center",

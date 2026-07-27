@@ -1,6 +1,8 @@
+import { useEffect } from "react";
 import { HeadContent, Scripts, createRootRoute } from "@tanstack/react-router";
 import { TanStackRouterDevtoolsPanel } from "@tanstack/react-router-devtools";
 import { TanStackDevtools } from "@tanstack/react-devtools";
+import { initSounds } from "#/lib/sound";
 
 import appCss from "../styles.css?url";
 
@@ -44,6 +46,12 @@ export const Route = createRootRoute({
 });
 
 function RootDocument({ children }: { children: React.ReactNode }) {
+  // One delegated set of listeners backs every `data-cuelume-*` element in
+  // the tree, so this survives navigation without rebinding.
+  useEffect(() => {
+    initSounds();
+  }, []);
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>

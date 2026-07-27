@@ -38,6 +38,7 @@ export function PollRules({
               key={fmt.key}
               onClick={() => onFormatChange(fmt.key)}
               aria-pressed={active}
+              data-cuelume-toggle="toggle"
               className={`rounded-lg border-2 border-ink px-3 py-[13px] text-center transition-shadow ${
                 active
                   ? "bg-neon shadow-[3px_3px_0_var(--color-ink)]"
@@ -67,6 +68,7 @@ export function PollRules({
               key={dur.hours}
               onClick={() => onDurationChange(dur.hours)}
               aria-pressed={active}
+              data-cuelume-toggle="toggle"
               className={`rounded-lg border-2 border-ink px-3 py-[13px] text-center transition-shadow ${
                 active
                   ? "bg-neon shadow-[3px_3px_0_var(--color-ink)]"

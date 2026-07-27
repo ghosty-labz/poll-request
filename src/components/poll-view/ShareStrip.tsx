@@ -1,10 +1,12 @@
 import { useCallback, useState } from "react";
+import { play } from "#/lib/sound";
 
 /** Copies `text` to the clipboard and flips a label for ~1.6s. */
 export function useCopy(text: string): [boolean, () => void] {
   const [copied, setCopied] = useState(false);
   const copy = useCallback(() => {
     navigator.clipboard?.writeText(text).catch(() => {});
+    play("droplet");
     setCopied(true);
     const t = setTimeout(() => setCopied(false), 1600);
     return () => clearTimeout(t);
@@ -30,6 +32,7 @@ export function ShareStrip({ url }: ShareStripProps) {
       <button
         type="button"
         onClick={copy}
+        data-cuelume-hover="whisper"
         className="rounded-[7px] border-2 border-ink bg-neon px-[13px] py-[7px] font-plex text-xs font-bold text-ink transition-transform hover:-translate-x-px hover:-translate-y-px hover:shadow-[2px_2px_0_var(--color-ink)]"
       >
         {copied ? "copied ✓" : "copy"}

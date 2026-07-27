@@ -5,6 +5,7 @@ import type {
   CreatePollResponse,
   PollDurationHours,
 } from "#/lib/poll/contracts";
+import { play } from "#/lib/sound";
 import { LivePreview } from "./LivePreview";
 import { OptionsEditor } from "./OptionsEditor";
 import { PollRules } from "./PollRules";
@@ -87,6 +88,7 @@ export function CreatePollForm() {
     if (!canCreate || submitting) return;
     setSubmitting(true);
     setError(null);
+    play("loading");
     try {
       const body: CreatePollRequest = {
         title: draft.question.trim(),
@@ -108,6 +110,7 @@ export function CreatePollForm() {
       }
       const data = (await res.json()) as CreatePollResponse;
       setShareUrl(data.shareUrl);
+      play("success");
 
       // Carry the management key forward — it's returned only once, at creation.
       // Landing on the poll screen with the key unlocks the manager controls.
@@ -121,6 +124,7 @@ export function CreatePollForm() {
       return;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
+      play("error");
     } finally {
       setSubmitting(false);
     }
@@ -155,6 +159,8 @@ export function CreatePollForm() {
             type="button"
             onClick={create}
             disabled={!canCreate || submitting}
+            data-cuelume-hover="chime"
+            data-cuelume-press="press"
             className="inline-flex items-center gap-[9px] rounded-lg border-2 border-ink bg-ink px-7 py-4 font-plex text-[15px] font-bold text-neon shadow-[5px_5px_0_var(--color-neon)] transition-transform hover:enabled:-translate-x-0.5 hover:enabled:-translate-y-0.5 hover:enabled:shadow-[7px_7px_0_var(--color-neon)] disabled:cursor-not-allowed disabled:opacity-40 disabled:shadow-[5px_5px_0_#c9c8ba]"
           >
             {submitting ? "pushing…" : "$ poll push →"}

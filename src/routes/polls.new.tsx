@@ -1,5 +1,6 @@
 import { Link, createFileRoute } from "@tanstack/react-router";
 import { CreatePollForm } from "#/components/create-poll/CreatePollForm";
+import { SoundToggle } from "#/components/SoundToggle";
 
 export const Route = createFileRoute("/polls/new")({ component: NewPollPage });
 
@@ -18,10 +19,15 @@ function NewPollPage() {
             </span>
           </Link>
           <div className="flex items-center gap-6 font-plex text-[13px] font-medium text-[#5c6356]">
-            <Link to="/polls" className="no-underline text-[#5c6356]">
+            <Link
+              to="/polls"
+              className="no-underline text-[#5c6356]"
+              data-cuelume-hover="whisper"
+            >
               my_polls
             </Link>
             <span className="text-ink">$ poll init</span>
+            <SoundToggle />
             <span className="inline-flex h-[30px] w-[30px] items-center justify-center rounded-full border-2 border-ink bg-neon font-plex text-[13px] font-bold text-ink">
               D
             </span>

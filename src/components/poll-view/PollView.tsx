@@ -1,5 +1,6 @@
 import { useMemo } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
+import { SoundToggle } from "#/components/SoundToggle";
 import { ManagerBar } from "./ManagerBar";
 import { OptionRow } from "./OptionRow";
 import { PollNotFound } from "./PollNotFound";
@@ -149,6 +150,7 @@ function Nav() {
         </span>
         <span className="font-plex text-[15px] font-bold text-ink">poll_request</span>
       </Link>
+      <SoundToggle />
     </div>
   );
 }

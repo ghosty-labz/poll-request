@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { PollView } from "#/lib/poll/contracts";
+import { play, type SoundName } from "#/lib/sound";
 import * as api from "./api";
 
 const REOPEN_DURATION_MS = 36 * 60 * 60 * 1000; // mirrors the backend default
@@ -29,9 +30,11 @@ export function usePoll(publicId: string, key: string | null): UsePoll {
   const [busy, setBusy] = useState(false);
   const [live, setLive] = useState(false);
   const canManageRef = useRef(false);
+  const totalVotesRef = useRef<number | null>(null);
 
   const adopt = useCallback((next: PollView) => {
     canManageRef.current = next.viewer.canManage;
+    totalVotesRef.current = next.totalVotes;
     setView(next);
     setStatus("ready");
     if (next.viewer.hasVoted || next.isExpired) setLive(true);
@@ -63,6 +66,12 @@ export function usePoll(publicId: string, key: string | null): UsePoll {
         const next = JSON.parse((e as MessageEvent).data) as PollView;
         // Preserve manager mode — the stream can't see our management key.
         next.viewer.canManage = canManageRef.current;
+        // A frame that carries new votes is somebody else voting: tick for it.
+        const previousTotal = totalVotesRef.current;
+        if (next.totalVotes !== null && previousTotal !== null && next.totalVotes > previousTotal) {
+          play("tick");
+        }
+        totalVotesRef.current = next.totalVotes;
         setView(next);
       } catch {
         /* ignore malformed frame */
@@ -72,14 +81,17 @@ export function usePoll(publicId: string, key: string | null): UsePoll {
     return () => source.close();
   }, [publicId, live]);
 
+  /** Runs an action, then sounds `done` on success or `error` on failure. */
   const run = useCallback(
-    async (action: () => Promise<PollView>) => {
+    async (action: () => Promise<PollView>, done: SoundName) => {
       setBusy(true);
       setError(null);
       try {
         adopt(await action());
+        play(done);
       } catch (err) {
         setError(err instanceof Error ? err.message : "Something went wrong.");
+        play("error");
       } finally {
         setBusy(false);
       }
@@ -90,18 +102,22 @@ export function usePoll(publicId: string, key: string | null): UsePoll {
   const vote = useCallback(
     (optionId: string) => {
       if (busy) return;
-      void run(() => api.castVote(publicId, optionId));
+      void run(() => api.castVote(publicId, optionId), "success");
     },
     [busy, run, publicId],
   );
 
   const closeVoting = useCallback(
-    () => void run(() => api.setExpiry(publicId, key, new Date(Date.now() - 1000))),
+    () => void run(() => api.setExpiry(publicId, key, new Date(Date.now() - 1000)), "toggle"),
     [run, publicId, key],
   );
 
   const reopenVoting = useCallback(
-    () => void run(() => api.setExpiry(publicId, key, new Date(Date.now() + REOPEN_DURATION_MS))),
+    () =>
+      void run(
+        () => api.setExpiry(publicId, key, new Date(Date.now() + REOPEN_DURATION_MS)),
+        "toggle",
+      ),
     [run, publicId, key],
   );
 
@@ -111,9 +127,11 @@ export function usePoll(publicId: string, key: string | null): UsePoll {
     try {
       await api.deletePoll(publicId, key);
       setStatus("deleted");
+      play("page");
       return true;
     } catch (err) {
       setError(err instanceof Error ? err.message : "Could not delete the poll.");
+      play("error");
       return false;
     } finally {
       setBusy(false);
